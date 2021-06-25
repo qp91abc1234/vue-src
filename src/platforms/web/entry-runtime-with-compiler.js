@@ -16,8 +16,8 @@ const idToTemplate = cached(id => {
 
 // 缓存 Runtime 模式下的 $mount方法
 const mount = Vue.prototype.$mount
-/* Vue 挂载函数 **/
-/* 定义 Runtime+compiler 模式的 $mount 方法，将模板转换为渲染函数 **/
+/** Vue 挂载函数 */
+/** 定义 Runtime+compiler 模式的 $mount 方法，将模板转换为渲染函数 */
 Vue.prototype.$mount = function (
   el?: string | Element,
   hydrating?: boolean
@@ -40,7 +40,7 @@ Vue.prototype.$mount = function (
     // 判断 options 中是否有定义 template 属性
     if (template) {
       // 判断 template 是否为字符串
-      if (typeof template === 'string') {        
+      if (typeof template === 'string') {
         if (template.charAt(0) === '#') {
           // 如果 template 属性中使用了 id 选择器(ex.'#app')，则根据 id 选择器获取模板字符串
           template = idToTemplate(template)
@@ -53,7 +53,7 @@ Vue.prototype.$mount = function (
           }
         }
       }
-      // template 是 dom 对象 
+      // template 是 dom 对象
       else if (template.nodeType) {
         template = template.innerHTML
       }

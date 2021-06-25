@@ -60,6 +60,8 @@ export function renderMixin (Vue: Class<Component>) {
 
   Vue.prototype._render = function (): VNode {
     const vm: Component = this
+    // 从 options 中获取 render 函数
+    // render 函数可以用户自己定义在 options 中，也可以在 Runtime+compiler 模式下编译生成
     const { render, _parentVnode } = vm.$options
 
     // reset _rendered flag on slots for duplicate slot check
@@ -80,12 +82,13 @@ export function renderMixin (Vue: Class<Component>) {
     // render self
     let vnode
     try {
+      // vm._renderProxy：Vue 实例，开发环境下是添加代理的 Vue 实例
+      // vm.$createElement：render 函数中调用，用于生成 vnode 的函数
+      // 在 render 函数中调用 vm.$createElement 函数生成 VNode 并返回
       vnode = render.call(vm._renderProxy, vm.$createElement)
     } catch (e) {
       handleError(e, vm, `render`)
-      // return error render result,
-      // or previous vnode to prevent render error causing blank component
-      /* istanbul ignore else */
+      // 降级生成 vnode
       if (process.env.NODE_ENV !== 'production') {
         if (vm.$options.renderError) {
           try {
@@ -101,8 +104,9 @@ export function renderMixin (Vue: Class<Component>) {
         vnode = vm._vnode
       }
     }
-    // return empty vnode in case the render function errored out
+    // vnode 类型检查
     if (!(vnode instanceof VNode)) {
+      // 判断是数组类型，则警告模板内有多个根节点，并返回空的 VNode
       if (process.env.NODE_ENV !== 'production' && Array.isArray(vnode)) {
         warn(
           'Multiple root nodes returned from render function. Render function ' +
@@ -112,7 +116,8 @@ export function renderMixin (Vue: Class<Component>) {
       }
       vnode = createEmptyVNode()
     }
-    // set parent
+
+    // 设置 vnode 的父节点并返回
     vnode.parent = _parentVnode
     return vnode
   }

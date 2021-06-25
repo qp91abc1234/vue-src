@@ -23,8 +23,7 @@ import {
 const SIMPLE_NORMALIZE = 1
 const ALWAYS_NORMALIZE = 2
 
-// wrapper function for providing a more flexible interface
-// without getting yelled at by flow
+/** 创建 vnode 包装函数 */
 export function createElement (
   context: Component,
   tag: any,
@@ -33,17 +32,21 @@ export function createElement (
   normalizationType: any,
   alwaysNormalize: boolean
 ): VNode | Array<VNode> {
+  // 兼容参数不一致的情况，应对不传 data 的情况
   if (Array.isArray(data) || isPrimitive(data)) {
     normalizationType = children
     children = data
     data = undefined
   }
+  // children 会根据 normalizationType 执行不同的 normalize 方法
   if (isTrue(alwaysNormalize)) {
     normalizationType = ALWAYS_NORMALIZE
   }
+  // 参数调整后进入私有方法完成功能
   return _createElement(context, tag, data, children, normalizationType)
 }
 
+/** 创建 vnode 函数 */
 export function _createElement (
   context: Component,
   tag?: string | Class<Component> | Function | Object,
@@ -51,6 +54,7 @@ export function _createElement (
   children?: any,
   normalizationType?: number
 ): VNode | Array<VNode> {
+  // data 校验，不允许是响应式的
   if (isDef(data) && isDef((data: any).__ob__)) {
     process.env.NODE_ENV !== 'production' && warn(
       `Avoid using observed data object as vnode data: ${JSON.stringify(data)}\n` +
@@ -87,25 +91,33 @@ export function _createElement (
     data.scopedSlots = { default: children[0] }
     children.length = 0
   }
+
+  // 把 n 维的 children 变成 1 维的 VNode 数组，并且对文本 VNode 做合并优化
   if (normalizationType === ALWAYS_NORMALIZE) {
     children = normalizeChildren(children)
-  } else if (normalizationType === SIMPLE_NORMALIZE) {
+  }
+  // 把 n 维的 children 变成 n - 1 维的 VNode 数组
+  else if (normalizationType === SIMPLE_NORMALIZE) {
     children = simpleNormalizeChildren(children)
   }
   let vnode, ns
+  // tag 为字符串的情况
   if (typeof tag === 'string') {
     let Ctor
     ns = (context.$vnode && context.$vnode.ns) || config.getTagNamespace(tag)
+    // 判断 tag 是否为 html 预留标签，ex.'div'
     if (config.isReservedTag(tag)) {
-      // platform built-in elements
       vnode = new VNode(
         config.parsePlatformTagName(tag), data, children,
         undefined, undefined, context
       )
-    } else if (isDef(Ctor = resolveAsset(context.$options, 'components', tag))) {
-      // component
+    }
+    // 判断 tag 是否注册的组件名
+    else if (isDef(Ctor = resolveAsset(context.$options, 'components', tag))) {
       vnode = createComponent(Ctor, data, context, children, tag)
-    } else {
+    }
+    // tag 为未知的元素
+    else {
       // unknown or unlisted namespaced elements
       // check at runtime because it may get assigned a namespace when its
       // parent normalizes children
@@ -114,10 +126,12 @@ export function _createElement (
         undefined, undefined, context
       )
     }
-  } else {
-    // direct component options / constructor
+  }
+  // tag 为组件选项/组件构造器的情况
+  else {
     vnode = createComponent(tag, data, context, children)
   }
+
   if (Array.isArray(vnode)) {
     return vnode
   } else if (isDef(vnode)) {

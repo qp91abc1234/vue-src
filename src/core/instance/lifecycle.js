@@ -131,7 +131,7 @@ export function lifecycleMixin (Vue: Class<Component>) {
   }
 }
 
-/* Vue 挂载函数 **/
+/** Vue 挂载函数 */
 export function mountComponent (
   vm: Component,
   el: ?Element,

@@ -35,7 +35,7 @@ const sharedPropertyDefinition = {
   set: noop
 }
 
-/* 访问代理函数 **/
+/** 访问代理函数 */
 export function proxy (target: Object, sourceKey: string, key: string) {
   sharedPropertyDefinition.get = function proxyGetter () {
     return this[sourceKey][key]
@@ -112,7 +112,7 @@ function initProps (vm: Component, propsOptions: Object) {
   toggleObserving(true)
 }
 
-/* 数据初始化 **/
+/** 数据初始化 */
 function initData (vm: Component) {
   // 获取数据对象并挂载到 vm._data
   let data = vm.$options.data
@@ -152,7 +152,7 @@ function initData (vm: Component) {
         `Use prop default value instead.`,
         vm
       )
-    } 
+    }
     // 数据对象中的 key 不是预留的 key
     else if (!isReserved(key)) {
       // 给数据对象中的 key 添加代理
