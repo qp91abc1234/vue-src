@@ -82,6 +82,7 @@ export function createPatchFunction (backend) {
     }
   }
 
+  /** 将 dom 元素转换为 vnode */
   function emptyNodeAt (elm) {
     return new VNode(nodeOps.tagName(elm).toLowerCase(), {}, [], undefined, elm)
   }
@@ -163,6 +164,7 @@ export function createPatchFunction (backend) {
         }
       }
 
+      // 根据 vnode 上的 tag 创建真实 Dom
       vnode.elm = vnode.ns
         ? nodeOps.createElementNS(vnode.ns, tag)
         : nodeOps.createElement(tag, vnode)
@@ -188,20 +190,26 @@ export function createPatchFunction (backend) {
           insert(parentElm, vnode.elm, refElm)
         }
       } else {
+        // 根据 vnode 上的 children 属性创建子 Dom 节点
         createChildren(vnode, children, insertedVnodeQueue)
         if (isDef(data)) {
           invokeCreateHooks(vnode, insertedVnodeQueue)
         }
+        // 将创建的 Dom 节点插入父 Dom
         insert(parentElm, vnode.elm, refElm)
       }
 
       if (process.env.NODE_ENV !== 'production' && data && data.pre) {
         creatingElmInVPre--
       }
-    } else if (isTrue(vnode.isComment)) {
+    }
+    // 要创建的为注释节点
+    else if (isTrue(vnode.isComment)) {
       vnode.elm = nodeOps.createComment(vnode.text)
       insert(parentElm, vnode.elm, refElm)
-    } else {
+    }
+    // 要创建的为文本节点
+    else {
       vnode.elm = nodeOps.createTextNode(vnode.text)
       insert(parentElm, vnode.elm, refElm)
     }
@@ -723,16 +731,16 @@ export function createPatchFunction (backend) {
               )
             }
           }
-          // either not server-rendered, or hydration failed.
-          // create an empty node and replace it
+          // 将要挂载的占位 Dom 转为 vnode
           oldVnode = emptyNodeAt(oldVnode)
         }
 
-        // replacing existing element
+        // 要挂载的占位 Dom
         const oldElm = oldVnode.elm
+        // 要挂载的占位 Dom 的父 Dom 元素
         const parentElm = nodeOps.parentNode(oldElm)
 
-        // create new node
+        // 根据要渲染的 vnode 创建真实 Dom 挂载到 parentElm 上
         createElm(
           vnode,
           insertedVnodeQueue,
@@ -775,6 +783,7 @@ export function createPatchFunction (backend) {
 
         // destroy old node
         if (isDef(parentElm)) {
+          // 移除要挂载的占位 Dom
           removeVnodes(parentElm, [oldVnode], 0, 0)
         } else if (isDef(oldVnode.tag)) {
           invokeDestroyHook(oldVnode)
