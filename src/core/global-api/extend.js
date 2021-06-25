@@ -18,24 +18,32 @@ export function initExtend (Vue: GlobalAPI) {
    */
   Vue.extend = function (extendOptions: Object): Function {
     extendOptions = extendOptions || {}
+    // 因为 extend 为静态方法，所以 this 为 Vue 构造函数
     const Super = this
     const SuperId = Super.cid
+    // 组件扩展选项都是通过 import 导入，所以每次导入的都是同一对象，因此可在组件扩展选项上缓存子类构造函数
     const cachedCtors = extendOptions._Ctor || (extendOptions._Ctor = {})
+    // 判断是否缓存了某父类对应的子类构造函数
     if (cachedCtors[SuperId]) {
       return cachedCtors[SuperId]
     }
 
+    // 对组件扩展选项中的 name 属性进行有效性检验
     const name = extendOptions.name || Super.options.name
     if (process.env.NODE_ENV !== 'production' && name) {
       validateComponentName(name)
     }
 
+    // 定义子类构造函数
     const Sub = function VueComponent (options) {
+      // 调用父类原型上的 _init 方法，即 Vue.Prototype._init
       this._init(options)
     }
+    // 继承父类原型
     Sub.prototype = Object.create(Super.prototype)
     Sub.prototype.constructor = Sub
     Sub.cid = cid++
+    // 将组件扩展选项与 Vue 上的选项合并后赋值给 Sub.options
     Sub.options = mergeOptions(
       Super.options,
       extendOptions
@@ -52,7 +60,7 @@ export function initExtend (Vue: GlobalAPI) {
       initComputed(Sub)
     }
 
-    // allow further extension/mixin/plugin usage
+    // 将父类的全局静态方法赋值给子类
     Sub.extend = Super.extend
     Sub.mixin = Super.mixin
     Sub.use = Super.use
@@ -74,7 +82,7 @@ export function initExtend (Vue: GlobalAPI) {
     Sub.extendOptions = extendOptions
     Sub.sealedOptions = extend({}, Sub.options)
 
-    // cache constructor
+    // 在组件扩展选项上缓存某父类对应的子类构造函数
     cachedCtors[SuperId] = Sub
     return Sub
   }

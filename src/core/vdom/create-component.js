@@ -98,6 +98,7 @@ const componentVNodeHooks = {
 
 const hooksToMerge = Object.keys(componentVNodeHooks)
 
+/** 组件创建函数 */
 export function createComponent (
   Ctor: Class<Component> | Function | Object | void,
   data: ?VNodeData,
@@ -109,10 +110,12 @@ export function createComponent (
     return
   }
 
+  // Vue 构造函数
   const baseCtor = context.$options._base
 
-  // plain options object: turn it into a constructor
+  // Ctor 为组件扩展选项时
   if (isObject(Ctor)) {
+    // 继承 Vue 构造函数生成组件的构造函数
     Ctor = baseCtor.extend(Ctor)
   }
 
@@ -182,10 +185,10 @@ export function createComponent (
     }
   }
 
-  // install component management hooks onto the placeholder node
+  // 安装组件钩子函数
   installComponentHooks(data)
 
-  // return a placeholder vnode
+  // 创建占位符 vnode
   const name = Ctor.options.name || tag
   const vnode = new VNode(
     `vue-component-${Ctor.cid}${name ? `-${name}` : ''}`,
@@ -223,11 +226,15 @@ export function createComponentInstanceForVnode (
   return new vnode.componentOptions.Ctor(options)
 }
 
+/** 安装组件钩子函数 */
 function installComponentHooks (data: VNodeData) {
   const hooks = data.hook || (data.hook = {})
   for (let i = 0; i < hooksToMerge.length; i++) {
+    // 钩子函数的 key，ex.init/prepatch...
     const key = hooksToMerge[i]
+    // 自定义的组件钩子函数
     const existing = hooks[key]
+    // 默认的组件钩子函数
     const toMerge = componentVNodeHooks[key]
     if (existing !== toMerge && !(existing && existing._merged)) {
       hooks[key] = existing ? mergeHook(toMerge, existing) : toMerge
@@ -235,6 +242,7 @@ function installComponentHooks (data: VNodeData) {
   }
 }
 
+/** 合并钩子函数 */
 function mergeHook (f1: any, f2: any): Function {
   const merged = (a, b) => {
     // flow complains about extra args which is why we use any

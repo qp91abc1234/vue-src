@@ -13,3 +13,9 @@
 
 ##### 03_`_update` 总结
 - 1、根据要渲染的 vnode 创建真实 Dom 替换要挂载的占位 Dom
+
+#### 二、组件化
+##### 00_占位符 vnode 的创建
+- 调用 createElement 方法时传入组件扩展选项时，根据组件扩展选项创建继承 Vue 的组件构造函数
+- 创建 VNodeData 对象，并在上面安装组件钩子函数
+- 创建占位符 vnode，传入 VNodeData 对象，并将组件构造函数放入组件 componentOptions 中传入

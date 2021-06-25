@@ -127,7 +127,7 @@ export function _createElement (
       )
     }
   }
-  // tag 为组件选项/组件构造器的情况
+  // tag 为组件扩展选项/组件构造器的情况
   else {
     vnode = createComponent(tag, data, context, children)
   }
