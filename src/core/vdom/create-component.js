@@ -44,6 +44,7 @@ const componentVNodeHooks = {
       const mountedNode: any = vnode // work around flow
       componentVNodeHooks.prepatch(mountedNode, mountedNode)
     } else {
+      // 根据占位符 vnode 创建组件
       const child = vnode.componentInstance = createComponentInstanceForVnode(
         vnode,
         activeInstance
@@ -214,8 +215,8 @@ export function createComponentInstanceForVnode (
 ): Component {
   const options: InternalComponentOptions = {
     _isComponent: true,
-    _parentVnode: vnode,
-    parent
+    _parentVnode: vnode, // 占位符 vnode
+    parent // 当前激活的 Vue 实例
   }
   // check inline-template render functions
   const inlineTemplate = vnode.data.inlineTemplate
@@ -223,6 +224,7 @@ export function createComponentInstanceForVnode (
     options.render = inlineTemplate.render
     options.staticRenderFns = inlineTemplate.staticRenderFns
   }
+  // 调用组件构造函数
   return new vnode.componentOptions.Ctor(options)
 }
 

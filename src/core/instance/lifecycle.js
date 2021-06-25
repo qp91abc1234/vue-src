@@ -25,7 +25,7 @@ export function initLifecycle (vm: Component) {
   const options = vm.$options
 
   // locate first non-abstract parent
-  let parent = options.parent
+  let parent = options.parent // 当前激活的 Vue 实例
   if (parent && !options.abstract) {
     while (parent.$options.abstract && parent.$parent) {
       parent = parent.$parent
@@ -33,6 +33,7 @@ export function initLifecycle (vm: Component) {
     parent.$children.push(vm)
   }
 
+  // 缓存父 Vue 实例
   vm.$parent = parent
   vm.$root = parent ? parent.$root : vm
 
@@ -51,14 +52,17 @@ export function lifecycleMixin (Vue: Class<Component>) {
   Vue.prototype._update = function (vnode: VNode, hydrating?: boolean) {
     const vm: Component = this
     const prevEl = vm.$el
+    // 上一次渲染的 vnode
     const prevVnode = vm._vnode
     const prevActiveInstance = activeInstance
+    // 当前激活的 Vue 实例
     activeInstance = vm
+    // 当前要渲染的 vnode
     vm._vnode = vnode
     // Vue.prototype.__patch__ is injected in entry points
     // based on the rendering backend used.
     if (!prevVnode) {
-      // initial render
+      // 上一次渲染的 vnode 为空，表示初始化渲染
       vm.$el = vm.__patch__(vm.$el, vnode, hydrating, false /* removeOnly */)
     } else {
       // updates

@@ -142,6 +142,7 @@ export function createPatchFunction (backend) {
     }
 
     vnode.isRootInsert = !nested // for transition enter check
+    // vnode 为占位符 vnode 时，根据占位符 vnode 创建组件
     if (createComponent(vnode, insertedVnodeQueue, parentElm, refElm)) {
       return
     }
@@ -215,19 +216,23 @@ export function createPatchFunction (backend) {
     }
   }
 
+  /** 创建组件 */
   function createComponent (vnode, insertedVnodeQueue, parentElm, refElm) {
     let i = vnode.data
     if (isDef(i)) {
       const isReactivated = isDef(vnode.componentInstance) && i.keepAlive
       if (isDef(i = i.hook) && isDef(i = i.init)) {
+        // 调用组件钩子函数 init 创建组件
         i(vnode, false /* hydrating */)
       }
       // after calling the init hook, if the vnode is a child component
       // it should've created a child instance and mounted it. the child
       // component also has set the placeholder vnode's elm.
       // in that case we can just return the element and be done.
+      // 判断占位符 vnode 生成的组件是否存在
       if (isDef(vnode.componentInstance)) {
         initComponent(vnode, insertedVnodeQueue)
+        // 将占位符 vnode 对应的 dom 元素插入 dom 树
         insert(parentElm, vnode.elm, refElm)
         if (isTrue(isReactivated)) {
           reactivateComponent(vnode, insertedVnodeQueue, parentElm, refElm)
@@ -242,6 +247,8 @@ export function createPatchFunction (backend) {
       insertedVnodeQueue.push.apply(insertedVnodeQueue, vnode.data.pendingInsert)
       vnode.data.pendingInsert = null
     }
+    // 组件的 $el 为组件渲染出的 dom 元素
+    // 用占位符 vnode.elm 缓存组件渲染出的 dom 元素
     vnode.elm = vnode.componentInstance.$el
     if (isPatchable(vnode)) {
       invokeCreateHooks(vnode, insertedVnodeQueue)
