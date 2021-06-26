@@ -165,7 +165,7 @@ export function createPatchFunction (backend) {
         }
       }
 
-      // 根据 vnode 上的 tag 创建真实 Dom
+      // 根据 vnode 上的 tag 创建真实 dom
       vnode.elm = vnode.ns
         ? nodeOps.createElementNS(vnode.ns, tag)
         : nodeOps.createElement(tag, vnode)
@@ -191,12 +191,12 @@ export function createPatchFunction (backend) {
           insert(parentElm, vnode.elm, refElm)
         }
       } else {
-        // 根据 vnode 上的 children 属性创建子 Dom 节点
+        // 根据 vnode 上的 children 属性创建子 dom 节点
         createChildren(vnode, children, insertedVnodeQueue)
         if (isDef(data)) {
           invokeCreateHooks(vnode, insertedVnodeQueue)
         }
-        // 将创建的 Dom 节点插入父 Dom
+        // 将创建的 dom 节点插入父 dom
         insert(parentElm, vnode.elm, refElm)
       }
 
@@ -738,16 +738,16 @@ export function createPatchFunction (backend) {
               )
             }
           }
-          // 将要挂载的占位 Dom 转为 vnode
+          // 将要挂载的占位 dom 转为 vnode
           oldVnode = emptyNodeAt(oldVnode)
         }
 
-        // 要挂载的占位 Dom
+        // 要挂载的占位 dom
         const oldElm = oldVnode.elm
-        // 要挂载的占位 Dom 的父 Dom 元素
+        // 要挂载的占位 dom 的父 dom 元素
         const parentElm = nodeOps.parentNode(oldElm)
 
-        // 根据要渲染的 vnode 创建真实 Dom 挂载到 parentElm 上
+        // 根据要渲染的 vnode 创建真实 dom 挂载到 parentElm 上
         createElm(
           vnode,
           insertedVnodeQueue,
@@ -790,7 +790,7 @@ export function createPatchFunction (backend) {
 
         // destroy old node
         if (isDef(parentElm)) {
-          // 移除要挂载的占位 Dom
+          // 移除要挂载的占位 dom
           removeVnodes(parentElm, [oldVnode], 0, 0)
         } else if (isDef(oldVnode.tag)) {
           invokeDestroyHook(oldVnode)

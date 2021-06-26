@@ -186,15 +186,15 @@ export function mountComponent (
     }
   } else {
     updateComponent = () => {
-      // vm._render() 生成的 VNode（虚拟 Dom）
-      // vm._update() 根据 VNode（虚拟 Dom）生成真实 Dom
+      // vm._render() 生成的 VNode（虚拟 dom
+      // vm._update() 根据 VNode（虚拟 dom）生成真实 dom
       // hydrating 与服务端渲染相关，认为 false 即可
       vm._update(vm._render(), hydrating)
     }
   }
 
   // 创建渲染 Watcher
-  // 渲染 Watcher 会在创建或数据更新时执行 updateComponent 方法，渲染真实 Dom
+  // 渲染 Watcher 会在创建或数据更新时执行 updateComponent 方法，渲染真实 dom
   new Watcher(vm, updateComponent, noop, {
     before () {
       if (vm._isMounted) {
