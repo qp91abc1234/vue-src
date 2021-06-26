@@ -243,6 +243,9 @@ export function createPatchFunction (backend) {
   }
 
   function initComponent (vnode, insertedVnodeQueue) {
+    // 组件中如果存在子组件
+    // 那么占位符 vnode.data.pendingInsert 缓存了子组件的 insertedVnodeQueue
+    // 将子组件的 insertedVnodeQueue 写入 insertedVnodeQueue 数组中
     if (isDef(vnode.data.pendingInsert)) {
       insertedVnodeQueue.push.apply(insertedVnodeQueue, vnode.data.pendingInsert)
       vnode.data.pendingInsert = null
@@ -323,6 +326,8 @@ export function createPatchFunction (backend) {
     i = vnode.data.hook // Reuse variable
     if (isDef(i)) {
       if (isDef(i.create)) i.create(emptyNode, vnode)
+      // 占位符 vnode.data.hook 中缓存了组件钩子函数 insert
+      // 将占位符 vnode 缓存进 insertedVnodeQueue
       if (isDef(i.insert)) insertedVnodeQueue.push(vnode)
     }
   }
@@ -574,11 +579,13 @@ export function createPatchFunction (backend) {
   }
 
   function invokeInsertHook (vnode, queue, initial) {
-    // delay insert hooks for component root nodes, invoke them after the
-    // element is really inserted
+    // 如果是组件的 patch 过程
+    // 则将 insertedVnodeQueue 缓存至占位符 vnode.data.pendingInsert
     if (isTrue(initial) && isDef(vnode.parent)) {
       vnode.parent.data.pendingInsert = queue
     } else {
+      // 如果是 Vue 实例的 patch 过程
+      // 则执行所有的 insert 钩子函数
       for (let i = 0; i < queue.length; ++i) {
         queue[i].data.hook.insert(queue[i])
       }
@@ -798,6 +805,7 @@ export function createPatchFunction (backend) {
       }
     }
 
+    // 在 dom 元素插入 dom tree 后会通过 for 循环由子组件到父组件依次调用 insert 钩子函数
     invokeInsertHook(vnode, insertedVnodeQueue, isInitialPatch)
     return vnode.elm
   }

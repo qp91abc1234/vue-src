@@ -53,8 +53,8 @@ function flushSchedulerQueue () {
   // as we run existing watchers
   for (index = 0; index < queue.length; index++) {
     watcher = queue[index]
-    if (watcher.before) {
-      watcher.before()
+    if (watcher.before) { // 只有渲染 watcher 有 before 属性
+      watcher.before() // 在 before 函数中执行 beforeUpdate 钩子
     }
     id = watcher.id
     has[id] = null
@@ -98,6 +98,7 @@ function callUpdatedHooks (queue) {
   while (i--) {
     const watcher = queue[i]
     const vm = watcher.vm
+    //  watcher 为渲染 watcher && watcher 对应的 Vue 实例已挂载
     if (vm._watcher === watcher && vm._isMounted) {
       callHook(vm, 'updated')
     }

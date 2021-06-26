@@ -96,7 +96,7 @@ export function lifecycleMixin (Vue: Class<Component>) {
     if (vm._isBeingDestroyed) {
       return
     }
-    callHook(vm, 'beforeDestroy')
+    callHook(vm, 'beforeDestroy') // 先父后子
     vm._isBeingDestroyed = true
     // remove self from parent
     const parent = vm.$parent
@@ -118,10 +118,10 @@ export function lifecycleMixin (Vue: Class<Component>) {
     }
     // call the last hook...
     vm._isDestroyed = true
-    // invoke destroy hooks on current rendered tree
+    // 触发组件钩子函数 destroy 进行销毁
     vm.__patch__(vm._vnode, null)
     // fire destroyed hook
-    callHook(vm, 'destroyed')
+    callHook(vm, 'destroyed') // 先子后父
     // turn off all instance listeners.
     vm.$off()
     // remove __vue__ reference
@@ -162,7 +162,7 @@ export function mountComponent (
       }
     }
   }
-  callHook(vm, 'beforeMount')
+  callHook(vm, 'beforeMount') // 先父后子
 
   let updateComponent
   /* istanbul ignore if */
@@ -198,14 +198,14 @@ export function mountComponent (
   new Watcher(vm, updateComponent, noop, {
     before () {
       if (vm._isMounted) {
-        callHook(vm, 'beforeUpdate')
+        callHook(vm, 'beforeUpdate') // 组件更新前调用
       }
     }
   }, true /* isRenderWatcher */)
   hydrating = false
 
-  // manually mounted instance, call mounted on self
-  // mounted is called for render-created child components in its inserted hook
+  // 此处执行的是 Vue 实例的 mounted 钩子函数
+  // mounted 钩子函数中可以访问到 dom 元素
   if (vm.$vnode == null) {
     vm._isMounted = true
     callHook(vm, 'mounted')
@@ -320,6 +320,7 @@ export function deactivateChildComponent (vm: Component, direct?: boolean) {
   }
 }
 
+/** 生命周期钩子执行函数 */
 export function callHook (vm: Component, hook: string) {
   // #7573 disable dep collection when invoking lifecycle hooks
   pushTarget()
