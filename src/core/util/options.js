@@ -378,6 +378,8 @@ export function mergeOptions (
   normalizeProps(child, vm)
   normalizeInject(child, vm)
   normalizeDirectives(child)
+
+  // 若定义了 extends 或 mixins 则递归调用 mergeOptions
   const extendsFrom = child.extends
   if (extendsFrom) {
     parent = mergeOptions(parent, extendsFrom, vm)
@@ -389,16 +391,20 @@ export function mergeOptions (
   }
   const options = {}
   let key
+  // 对 parent 中的 key 进行合并
   for (key in parent) {
     mergeField(key)
   }
+  // 对 child 中有 parent 中没有的 key 进行合并
   for (key in child) {
     if (!hasOwn(parent, key)) {
       mergeField(key)
     }
   }
   function mergeField (key) {
+    // 根据键值获取合并策略
     const strat = strats[key] || defaultStrat
+    // 根据合并策略进行合并
     options[key] = strat(parent[key], child[key], vm, key)
   }
   return options

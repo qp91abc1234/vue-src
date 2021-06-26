@@ -33,3 +33,10 @@
 - 2、`vm._render` 中调用了组件扩展选项中的渲染函数（根据 template、el 属性对应的模板编译成的渲染函数）生成渲染 vnode
 - 3、`vm._update` 根据渲染 vnode 生成 dom 元素
 - 4、将生成的 dom 元素赋值给组件的 $el 属性，将组件的 $el 属性赋值给占位符 vnode 的 elm 属性，最后将占位符 vnode 的 elm 属性插入 dom 树
+
+##### 02.options 合并
+
+- 1、mergeOptions：合并函数，由深到浅的对合并选项进行合并，合并过程中会根据合并选项的键值寻找合适的合并策略进行合并
+- 2、全局的 options 合并：创建 Vue 实例前调用 Vue.mixin，将混入对象合并到 Vue 构造函数的 options 属性上，后续创建的所有 Vue 实例都会受到混入对象的影响
+- 3、Vue 实例上的 options 合并：将构造函数中传入的参数 options 与 Vue 构造函数上的 options 进行合并，合并后赋值给 vm.$options
+- 4、组件构造函数上的 options 合并：将组件扩展选项与父类构造函数 options 合并，将结果赋值给组件构造函数 options
