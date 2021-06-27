@@ -12,7 +12,7 @@ export function initAssetRegisters (Vue: GlobalAPI) {
       id: string,
       definition: Function | Object
     ): Function | Object | void {
-      if (!definition) {
+      if (!definition) { // 参数二不传则返回已定义内容
         return this.options[type + 's'][id]
       } else {
         /* istanbul ignore if */
@@ -21,6 +21,7 @@ export function initAssetRegisters (Vue: GlobalAPI) {
         }
         if (type === 'component' && isPlainObject(definition)) {
           definition.name = definition.name || id
+          // 生成组件构造函数
           definition = this.options._base.extend(definition)
         }
         if (type === 'directive' && typeof definition === 'function') {

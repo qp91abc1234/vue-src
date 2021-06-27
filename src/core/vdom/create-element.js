@@ -113,6 +113,7 @@ export function _createElement (
       )
     }
     // 判断 tag 是否注册的组件名
+    // resolveAsset：从 context.$options.components[tag] 中获取组件选项或组件构造函数赋值给 Ctor
     else if (isDef(Ctor = resolveAsset(context.$options, 'components', tag))) {
       vnode = createComponent(Ctor, data, context, children, tag)
     }
