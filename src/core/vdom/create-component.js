@@ -132,12 +132,14 @@ export function createComponent (
   // async component
   let asyncFactory
   if (isUndef(Ctor.cid)) {
+    // 缓存异步工厂函数，用于创建占位符 vnode
     asyncFactory = Ctor
+    // 获取异步组件
+    // 异步组件工厂函数执行未成功时，返回 undefined，进而返回占位符 vnode
+    // 异步组件工厂函数执行成功时，返回缓存的异步组件的构造器，后续执行正常的组件 vnode 创建流程
     Ctor = resolveAsyncComponent(asyncFactory, baseCtor, context)
     if (Ctor === undefined) {
-      // return a placeholder node for async component, which is rendered
-      // as a comment node but preserves all the raw information for the node.
-      // the information will be used for async server-rendering and hydration.
+      // 为异步组件返回一个占位符 vnode，占位符 vnode 会渲染为注释节点
       return createAsyncPlaceholder(
         asyncFactory,
         data,
