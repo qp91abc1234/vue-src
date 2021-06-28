@@ -181,11 +181,14 @@ const computedWatcherOptions = { computed: true }
 
 function initComputed (vm: Component, computed: Object) {
   // $flow-disable-line
+  // 缓存计算属性对应的计算 watcher
   const watchers = vm._computedWatchers = Object.create(null)
   // computed properties are just getters during SSR
+  // 是否为服务端渲染
   const isSSR = isServerRendering()
 
   for (const key in computed) {
+    // 获取计算属性值
     const userDef = computed[key]
     const getter = typeof userDef === 'function' ? userDef : userDef.get
     if (process.env.NODE_ENV !== 'production' && getter == null) {
@@ -196,7 +199,7 @@ function initComputed (vm: Component, computed: Object) {
     }
 
     if (!isSSR) {
-      // create internal watcher for the computed property.
+      // 为计算属性创建计算 watcher
       watchers[key] = new Watcher(
         vm,
         getter || noop,
@@ -205,12 +208,10 @@ function initComputed (vm: Component, computed: Object) {
       )
     }
 
-    // component-defined computed properties are already defined on the
-    // component prototype. We only need to define computed properties defined
-    // at instantiation here.
+    // 判断计算属性是否存在于 Vue 实例上
     if (!(key in vm)) {
       defineComputed(vm, key, userDef)
-    } else if (process.env.NODE_ENV !== 'production') {
+    } else if (process.env.NODE_ENV !== 'production') { // 计算属性在 data/props 中有同名属性，警告提示
       if (key in vm.$data) {
         warn(`The computed property "${key}" is already defined in data.`, vm)
       } else if (vm.$options.props && key in vm.$options.props) {
@@ -225,10 +226,10 @@ export function defineComputed (
   key: string,
   userDef: Object | Function
 ) {
-  const shouldCache = !isServerRendering()
+  const shouldCache = !isServerRendering() // true
   if (typeof userDef === 'function') {
     sharedPropertyDefinition.get = shouldCache
-      ? createComputedGetter(key)
+      ? createComputedGetter(key) // 创建计算属性的 get 函数
       : userDef
     sharedPropertyDefinition.set = noop
   } else {
@@ -255,10 +256,10 @@ export function defineComputed (
 
 function createComputedGetter (key) {
   return function computedGetter () {
-    const watcher = this._computedWatchers && this._computedWatchers[key]
+    const watcher = this._computedWatchers && this._computedWatchers[key] // 获取计算 watcher
     if (watcher) {
-      watcher.depend()
-      return watcher.evaluate()
+      watcher.depend() // 计算属性收集依赖
+      return watcher.evaluate()  // 计算属性求值
     }
   }
 }

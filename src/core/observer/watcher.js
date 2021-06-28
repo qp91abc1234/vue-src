@@ -91,8 +91,8 @@ export default class Watcher {
       }
     }
     if (this.computed) {
-      this.value = undefined
-      this.dep = new Dep()
+      this.value = undefined // 使用时求值
+      this.dep = new Dep() // 依赖管理对象，此处定义的可称为计算属性 dep
     } else {
       this.value = this.get()
     }
@@ -179,17 +179,17 @@ export default class Watcher {
       // It initializes as lazy by default, and only becomes activated when
       // it is depended on by at least one subscriber, which is typically
       // another computed property or a component's render function.
-      if (this.dep.subs.length === 0) {
+      if (this.dep.subs.length === 0) { // 计算属性无参与渲染
         // In lazy mode, we don't want to perform computations until necessary,
         // so we simply mark the watcher as dirty. The actual computation is
         // performed just-in-time in this.evaluate() when the computed property
         // is accessed.
         this.dirty = true
-      } else {
+      } else { // 计算属性有参与渲染
         // In activated mode, we want to proactively perform the computation
         // but only notify our subscribers when the value has indeed changed.
         this.getAndInvoke(() => {
-          this.dep.notify()
+          this.dep.notify() // 通知渲染 watcher 进行重新渲染
         })
       }
     } else if (this.sync) {
@@ -252,7 +252,7 @@ export default class Watcher {
    */
   depend () {
     if (this.dep && Dep.target) {
-      this.dep.depend()
+      this.dep.depend() // 计算属性获取时调用，让渲染 watcher 订阅
     }
   }
 
