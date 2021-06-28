@@ -40,26 +40,22 @@ export class Observer {
   vmCount: number; // number of vms that has this object as root $data
 
   constructor (value: any) {
-    this.value = value
-    this.dep = new Dep()
+    this.value = value // 观察者对象单向绑定观察的数据
+    this.dep = new Dep() // 依赖管理对象，此处定义的称为属性值 dep
     this.vmCount = 0
-    def(value, '__ob__', this)
+    def(value, '__ob__', this) // 观察的数据单向绑定观察者对象
     if (Array.isArray(value)) {
-      const augment = hasProto
+      const augment = hasProto // 运行环境是否支持原型链
         ? protoAugment
         : copyAugment
-      augment(value, arrayMethods, arrayKeys)
-      this.observeArray(value)
+      augment(value, arrayMethods, arrayKeys) // 对数组中的方法(ex.push)进行扩展，可通过属性值 dep 通知依赖进行重新渲染
+      this.observeArray(value) // 遍历数组中的元素，为其绑定观察者对象（元素需为对象元素）
     } else {
-      this.walk(value)
+      this.walk(value) // 遍历对象中的每个属性，为其定义响应式
     }
   }
 
-  /**
-   * Walk through each property and convert them into
-   * getter/setters. This method should only be called when
-   * value type is Object.
-   */
+  // 遍历对象中的每个属性，为其定义响应式
   walk (obj: Object) {
     const keys = Object.keys(obj)
     for (let i = 0; i < keys.length; i++) {
@@ -67,9 +63,7 @@ export class Observer {
     }
   }
 
-  /**
-   * Observe a list of Array items.
-   */
+  // 对数组的元素进行双向绑定观察者对象
   observeArray (items: Array<any>) {
     for (let i = 0, l = items.length; i < l; i++) {
       observe(items[i])
@@ -107,20 +101,21 @@ function copyAugment (target: Object, src: Object, keys: Array<string>) {
  * or the existing observer if the value already has one.
  */
 export function observe (value: any, asRootData: ?boolean): Observer | void {
+  // 数据校验
   if (!isObject(value) || value instanceof VNode) {
     return
   }
   let ob: Observer | void
   if (hasOwn(value, '__ob__') && value.__ob__ instanceof Observer) {
-    ob = value.__ob__
+    ob = value.__ob__ // 数据存在观察者对象，则直接返回
   } else if (
     shouldObserve &&
-    !isServerRendering() &&
-    (Array.isArray(value) || isPlainObject(value)) &&
-    Object.isExtensible(value) &&
-    !value._isVue
+    !isServerRendering() && // 非服务端渲染
+    (Array.isArray(value) || isPlainObject(value)) && // 数组对象或普通对象
+    Object.isExtensible(value) && // 可扩展
+    !value._isVue // 非 Vue 实例
   ) {
-    ob = new Observer(value)
+    ob = new Observer(value) // 双向绑定观察者对象
   }
   if (asRootData && ob) {
     ob.vmCount++
@@ -138,30 +133,41 @@ export function defineReactive (
   customSetter?: ?Function,
   shallow?: boolean
 ) {
+  // 依赖管理对象，缓存对属性的依赖，此处定义的称为属性 dep
   const dep = new Dep()
 
+  // 属性校验
   const property = Object.getOwnPropertyDescriptor(obj, key)
   if (property && property.configurable === false) {
     return
   }
 
-  // cater for pre-defined getter/setters
+  // 获取属性值
   const getter = property && property.get
   const setter = property && property.set
+  // 属性上未定义 get 方法 && 参数未传入属性值时
   if ((!getter || setter) && arguments.length === 2) {
     val = obj[key]
   }
 
+  // 非浅递归定义响应式时为属性值双向绑定观察者对象
   let childOb = !shallow && observe(val)
+  // 通过 get/set 方法为属性定义响应式
+  // get 方法中收集依赖
+  // set 方法中通知依赖
   Object.defineProperty(obj, key, {
     enumerable: true,
     configurable: true,
     get: function reactiveGetter () {
       const value = getter ? getter.call(obj) : val
       if (Dep.target) {
-        dep.depend()
+        dep.depend() // 属性 dep 收集依赖
         if (childOb) {
+          // 属性值扩展 dep 收集依赖
+          // 通过 Vue.set 方法对属性值进行新增属性时，可通知属性值扩展 dep 中的依赖进行重新渲染
           childOb.dep.depend()
+          // 属性值为数组，遍历数组，若存在嵌套数组，则会递归遍历，遍历的数组元素若为对象，为数组元素的属性值扩展 dep 收集依赖
+          // 因为数组索引未定义响应式，当数组元素为对象时，若不对数组元素的属性值扩展 dep 收集依赖，通过 Vue.set 新增数组元素的属性时，就无法通知依赖进行重新渲染
           if (Array.isArray(value)) {
             dependArray(value)
           }
@@ -184,7 +190,9 @@ export function defineReactive (
       } else {
         val = newVal
       }
+      // 非浅递归定义响应式时为新属性值双向绑定观察者对象
       childOb = !shallow && observe(newVal)
+      // 属性 dep 通知依赖重新渲染
       dep.notify()
     }
   })
@@ -201,15 +209,21 @@ export function set (target: Array<any> | Object, key: any, val: any): any {
   ) {
     warn(`Cannot set reactive property on undefined, null, or primitive value: ${(target: any)}`)
   }
+
+  // 对数组进行修改
   if (Array.isArray(target) && isValidArrayIndex(key)) {
     target.length = Math.max(target.length, key)
-    target.splice(key, 1, val)
+    target.splice(key, 1, val) // splice 方法已被重定义，可通过属性值 dep 通知依赖进行重新渲染
     return val
   }
+
+  // 属性存在于 target 中，已经是响应式，可直接赋值
   if (key in target && !(key in Object.prototype)) {
     target[key] = val
     return val
   }
+
+  // 获取 target 的观察者对象
   const ob = (target: any).__ob__
   if (target._isVue || (ob && ob.vmCount)) {
     process.env.NODE_ENV !== 'production' && warn(
@@ -218,11 +232,16 @@ export function set (target: Array<any> | Object, key: any, val: any): any {
     )
     return val
   }
+
+  // target 对象非响应式，赋值后直接返回
   if (!ob) {
     target[key] = val
     return val
   }
+
+  // 给 target 新增响应式属性
   defineReactive(ob.value, key, val)
+  // 让 target 对象的属性值扩展 dep 通知依赖重新渲染
   ob.dep.notify()
   return val
 }

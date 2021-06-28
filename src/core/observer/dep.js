@@ -19,20 +19,24 @@ export default class Dep {
     this.subs = []
   }
 
+  // 依赖管理对象绑定依赖
   addSub (sub: Watcher) {
     this.subs.push(sub)
   }
 
+  // 依赖管理对象移除依赖
   removeSub (sub: Watcher) {
     remove(this.subs, sub)
   }
 
+  // 建立依赖管理对象与依赖间的双向绑定
   depend () {
     if (Dep.target) {
       Dep.target.addDep(this)
     }
   }
 
+  // 通知依赖进行更新
   notify () {
     // stabilize the subscriber list first
     const subs = this.subs.slice()

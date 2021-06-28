@@ -47,6 +47,7 @@ function flushSchedulerQueue () {
   //    user watchers are created before the render watcher)
   // 3. If a component is destroyed during a parent component's watcher run,
   //    its watchers can be skipped.
+  // 对依赖进行排序，确保父组件的渲染 watcher 优先于子组件的渲染 watcher ，用户 watcher 优先于渲染 watcher
   queue.sort((a, b) => a.id - b.id)
 
   // do not cache length because more watchers might be pushed
@@ -130,13 +131,11 @@ function callActivatedHooks (queue) {
  */
 export function queueWatcher (watcher: Watcher) {
   const id = watcher.id
-  if (has[id] == null) {
+  if (has[id] == null) { // 判断队列中是否存在当前依赖
     has[id] = true
-    if (!flushing) {
+    if (!flushing) { // 判断是否开始执行队列中的依赖
       queue.push(watcher)
-    } else {
-      // if already flushing, splice the watcher based on its id
-      // if already past its id, it will be run next immediately.
+    } else { // 队列中的依赖已开始执行，则需根据依赖的 id 进行插入
       let i = queue.length - 1
       while (i > index && queue[i].id > watcher.id) {
         i--
@@ -144,7 +143,7 @@ export function queueWatcher (watcher: Watcher) {
       queue.splice(i + 1, 0, watcher)
     }
     // queue the flush
-    if (!waiting) {
+    if (!waiting) { // 确保 if 中的内容执行过程中不会被重复执行
       waiting = true
       nextTick(flushSchedulerQueue)
     }

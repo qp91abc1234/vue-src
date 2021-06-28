@@ -131,8 +131,11 @@ export default class Watcher {
   addDep (dep: Dep) {
     const id = dep.id
     if (!this.newDepIds.has(id)) {
-      this.newDepIds.add(id)
+      this.newDepIds.add(id)  // newDepIds/newDeps 缓存当前 tick 的依赖管理对象
       this.newDeps.push(dep)
+      // depIds/deps 缓存上一轮 tick 的依赖管理对象
+      // depIds 存在依赖管理对象，则双向绑定已建立
+      // depIds 不存在依赖管理对象，则建立依赖管理对象到依赖的单向绑定
       if (!this.depIds.has(id)) {
         dep.addSub(this)
       }
@@ -146,10 +149,15 @@ export default class Watcher {
     let i = this.deps.length
     while (i--) {
       const dep = this.deps[i]
+      // 上一轮 tick 的依赖管理对象在当前没有被依赖
       if (!this.newDepIds.has(dep.id)) {
+        // 依赖管理对象移除依赖，进行单向解绑
         dep.removeSub(this)
       }
     }
+
+    // 将 newDepIds/newDeps 赋值给 depIds/deps，并清空 newDepIds/newDeps
+    // 完成依赖对依赖管理对象的单向绑定/解绑
     let tmp = this.depIds
     this.depIds = this.newDepIds
     this.newDepIds = tmp

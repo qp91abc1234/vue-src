@@ -160,7 +160,7 @@ function initData (vm: Component) {
     }
   }
 
-  // 对数据对象做响应式处理
+  // 对数据对象做响应式处理，双向绑定观察者对象
   observe(data, true /* asRootData */)
 }
 
