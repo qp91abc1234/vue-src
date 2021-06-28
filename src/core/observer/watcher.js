@@ -56,11 +56,11 @@ export default class Watcher {
     vm._watchers.push(this)
     // options
     if (options) {
-      this.deep = !!options.deep
-      this.user = !!options.user
-      this.computed = !!options.computed
-      this.sync = !!options.sync
-      this.before = options.before
+      this.deep = !!options.deep // 用户 watcher 专用： 是否递归监听对象属性
+      this.user = !!options.user // 用户 watcher 专用： 是否为用户 watcher
+      this.computed = !!options.computed // 计算 watcher 专用：是否为计算 watcher
+      this.sync = !!options.sync // 用户 watcher 专用： 用户 watcher 触发后是否同步执行回调
+      this.before = options.before // 渲染 watcher 专用：渲染 watcher 执行前调用
     } else {
       this.deep = this.user = this.computed = this.sync = false
     }
@@ -213,9 +213,8 @@ export default class Watcher {
     const value = this.get()
     if (
       value !== this.value ||
-      // Deep watchers and watchers on Object/Arrays should fire even
-      // when the value is the same, because the value may
-      // have mutated.
+      // 值相同时，判断是否为深度监听
+      // 深度监听时，监听的对象或数组值不变，但子属性/元素会发生改变
       isObject(value) ||
       this.deep
     ) {

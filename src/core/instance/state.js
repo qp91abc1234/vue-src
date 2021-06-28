@@ -307,7 +307,7 @@ function initWatch (vm: Component, watch: Object) {
 
 function createWatcher (
   vm: Component,
-  expOrFn: string | Function,
+  expOrFn: string | Function, // 为函数时，监听函数返回值变化
   handler: any,
   options?: Object
 ) {
@@ -316,7 +316,7 @@ function createWatcher (
     handler = handler.handler
   }
   if (typeof handler === 'string') {
-    handler = vm[handler]
+    handler = vm[handler] // 去 methods 中取对应的函数
   }
   return vm.$watch(expOrFn, handler, options)
 }
@@ -348,21 +348,21 @@ export function stateMixin (Vue: Class<Component>) {
   Vue.prototype.$delete = del
 
   Vue.prototype.$watch = function (
-    expOrFn: string | Function,
+    expOrFn: string | Function, // 传入函数意味着侦听函数返回值
     cb: any,
     options?: Object
   ): Function {
     const vm: Component = this
-    if (isPlainObject(cb)) {
+    if (isPlainObject(cb)) { // 参数处理
       return createWatcher(vm, expOrFn, cb, options)
     }
     options = options || {}
     options.user = true
-    const watcher = new Watcher(vm, expOrFn, cb, options)
-    if (options.immediate) {
+    const watcher = new Watcher(vm, expOrFn, cb, options) // 创建用户 watcher
+    if (options.immediate) { // 创建后立马执行回调
       cb.call(vm, watcher.value)
     }
-    return function unwatchFn () {
+    return function unwatchFn () { // 返回侦听取消函数
       watcher.teardown()
     }
   }
