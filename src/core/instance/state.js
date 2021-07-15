@@ -65,31 +65,32 @@ export function initState (vm: Component) {
 }
 
 function initProps (vm: Component, propsOptions: Object) {
-  const propsData = vm.$options.propsData || {}
+  const propsData = vm.$options.propsData || {} // 父组件传给子组件的属性数据
   const props = vm._props = {}
   // cache prop keys so that future props updates can iterate using Array
   // instead of dynamic object key enumeration.
   const keys = vm.$options._propKeys = []
   const isRoot = !vm.$parent
   // root instance props should be converted
-  if (!isRoot) {
-    toggleObserving(false)
+  if (!isRoot) { // 组件中的属性值都是从上层组件传递而来，在上层组件中已调用过 observe 函数
+    toggleObserving(false) // 关闭 observe 函数，省略了递归定义响应式的过程
   }
   for (const key in propsOptions) {
     keys.push(key)
+    // 属性的求值和校验
     const value = validateProp(key, propsOptions, propsData, vm)
     /* istanbul ignore else */
     if (process.env.NODE_ENV !== 'production') {
-      const hyphenatedKey = hyphenate(key)
+      const hyphenatedKey = hyphenate(key) // 将属性转为连字符形式
       if (isReservedAttribute(hyphenatedKey) ||
-          config.isReservedAttr(hyphenatedKey)) {
+          config.isReservedAttr(hyphenatedKey)) { // 判断属性是否为保留属性，是则警告提示
         warn(
           `"${hyphenatedKey}" is a reserved attribute and cannot be used as component prop.`,
           vm
         )
       }
       defineReactive(props, key, value, () => {
-        if (vm.$parent && !isUpdatingChildComponent) {
+        if (vm.$parent && !isUpdatingChildComponent) { // 不在子组件更新过程中修改属性则警告提示
           warn(
             `Avoid mutating a prop directly since the value will be ` +
             `overwritten whenever the parent component re-renders. ` +
@@ -100,13 +101,13 @@ function initProps (vm: Component, propsOptions: Object) {
         }
       })
     } else {
-      defineReactive(props, key, value)
+      defineReactive(props, key, value) // 定义响应式
     }
     // static props are already proxied on the component's prototype
     // during Vue.extend(). We only need to proxy props defined at
     // instantiation here.
     if (!(key in vm)) {
-      proxy(vm, `_props`, key)
+      proxy(vm, `_props`, key)  // 给 Vue 实例上的 props 添加代理
     }
   }
   toggleObserving(true)

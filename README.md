@@ -139,3 +139,13 @@
     - immediate：监听 watcher 创建后立马调用回调函数
     - sync：使回调函数同步执行，否则在 nextTick 执行
     - deep：监听的属性为对象/数组时，可递归监听属性的子属性/子元素
+
+##### 02.props 更新
+
+- 父组件中数据变化，通知父组件重新渲染
+    - render 过程中，根据父组件实例中的新数据生成新的子组件 vnode
+        - 此时子组件 vnode.componentOptions.propsData 已得到更新
+    - update 过程中，进行 patch 操作，递归执行 patchVnode
+        - patchVnode 到子组件 vnode 时，用新子组件 vnode 上的数据更新对应的组件实例
+            - 更新 props，触发响应式（若此时子组件渲染 watcher 有订阅 props，则通知子组件重新渲染）
+

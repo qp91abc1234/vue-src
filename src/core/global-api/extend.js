@@ -91,7 +91,7 @@ export function initExtend (Vue: GlobalAPI) {
 function initProps (Comp) {
   const props = Comp.options.props
   for (const key in props) {
-    proxy(Comp.prototype, `_props`, key)
+    proxy(Comp.prototype, `_props`, key) // 组件的属性代理定义在组件构造函数的原型上，避免在每个组件上定义
   }
 }
 
