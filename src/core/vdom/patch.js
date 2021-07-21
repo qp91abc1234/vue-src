@@ -523,6 +523,7 @@ export function createPatchFunction (backend) {
       return
     }
 
+    // 让新 vnode 指向旧 vnode 对应的 dom 元素
     const elm = vnode.elm = oldVnode.elm
 
     if (isTrue(oldVnode.isAsyncPlaceholder)) {
@@ -550,27 +551,31 @@ export function createPatchFunction (backend) {
     let i
     const data = vnode.data
     if (isDef(data) && isDef(i = data.hook) && isDef(i = i.prepatch)) {
-      i(oldVnode, vnode)
+      i(oldVnode, vnode) // vnode 为组件 vnode，进行组件实例上数据的更新
     }
 
     const oldCh = oldVnode.children
     const ch = vnode.children
+
+    // dom 元素上属性的更新
     if (isDef(data) && isPatchable(vnode)) {
       for (i = 0; i < cbs.update.length; ++i) cbs.update[i](oldVnode, vnode)
       if (isDef(i = data.hook) && isDef(i = i.update)) i(oldVnode, vnode)
     }
+
+    // children 的更新
     if (isUndef(vnode.text)) {
-      if (isDef(oldCh) && isDef(ch)) {
+      if (isDef(oldCh) && isDef(ch)) { // 新旧 vnode 都存在 children 且不相同，则进行核心 diff 算法
         if (oldCh !== ch) updateChildren(elm, oldCh, ch, insertedVnodeQueue, removeOnly)
-      } else if (isDef(ch)) {
-        if (isDef(oldVnode.text)) nodeOps.setTextContent(elm, '')
-        addVnodes(elm, null, ch, 0, ch.length - 1, insertedVnodeQueue)
-      } else if (isDef(oldCh)) {
-        removeVnodes(elm, oldCh, 0, oldCh.length - 1)
-      } else if (isDef(oldVnode.text)) {
-        nodeOps.setTextContent(elm, '')
+      } else if (isDef(ch)) { // 仅新 vnode 存在 children
+        if (isDef(oldVnode.text)) nodeOps.setTextContent(elm, '') // 旧 vnode 若为文本节点，则清空文本内容
+        addVnodes(elm, null, ch, 0, ch.length - 1, insertedVnodeQueue) // 添加新 vnode.children 对应的 dom 元素至 dom 树
+      } else if (isDef(oldCh)) { // 仅旧 vnode 存在 children
+        removeVnodes(elm, oldCh, 0, oldCh.length - 1) // 从 dom 树移除旧 vnode.children 对应的 dom 元素
+      } else if (isDef(oldVnode.text)) { // 新旧 vnode 都不存在 children
+        nodeOps.setTextContent(elm, '') // 若旧 vnode 若为文本节点，则清空文本内容
       }
-    } else if (oldVnode.text !== vnode.text) {
+    } else if (oldVnode.text !== vnode.text) { // 新旧 vnode 都是文本节点，则更新文本内容
       nodeOps.setTextContent(elm, vnode.text)
     }
     if (isDef(data)) {
@@ -720,7 +725,7 @@ export function createPatchFunction (backend) {
     } else {
       const isRealElement = isDef(oldVnode.nodeType)
       if (!isRealElement && sameVnode(oldVnode, vnode)) {
-        // patch existing root node
+        // 新旧 vnode 相同时
         patchVnode(oldVnode, vnode, insertedVnodeQueue, removeOnly)
       } else {
         if (isRealElement) {
@@ -765,8 +770,8 @@ export function createPatchFunction (backend) {
           nodeOps.nextSibling(oldElm)
         )
 
-        // update parent placeholder node element, recursively
-        if (isDef(vnode.parent)) {
+        // 递归更新占位符 vnode 对 dom 元素的引用
+        if (isDef(vnode.parent)) { // vnode 为渲染 vnode 时才有 parent 属性，该属性指向占位符 vnode
           let ancestor = vnode.parent
           const patchable = isPatchable(vnode)
           while (ancestor) {
@@ -795,9 +800,8 @@ export function createPatchFunction (backend) {
           }
         }
 
-        // destroy old node
+        // 删除旧 vnode 对应的 dom 元素
         if (isDef(parentElm)) {
-          // 移除要挂载的占位 dom
           removeVnodes(parentElm, [oldVnode], 0, 0)
         } else if (isDef(oldVnode.tag)) {
           invokeDestroyHook(oldVnode)

@@ -65,7 +65,7 @@ export function lifecycleMixin (Vue: Class<Component>) {
       // 上一次渲染的 vnode 为空，表示初始化渲染
       vm.$el = vm.__patch__(vm.$el, vnode, hydrating, false /* removeOnly */)
     } else {
-      // updates
+      // 根据新 vnode 对旧 vnode 对应的 dom 元素进行更新
       vm.$el = vm.__patch__(prevVnode, vnode)
     }
     activeInstance = prevActiveInstance

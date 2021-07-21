@@ -143,9 +143,20 @@
 ##### 02.props 更新
 
 - 父组件中数据变化，通知父组件重新渲染
-    - render 过程中，根据父组件实例中的新数据生成新的子组件 vnode
+    - vm._render 过程中，根据父组件实例中的新数据生成新的子组件 vnode
         - 此时子组件 vnode.componentOptions.propsData 已得到更新
-    - update 过程中，进行 patch 操作，递归执行 patchVnode
+    - vm._update 过程中，进行 patch 操作，递归执行 patchVnode
         - patchVnode 到子组件 vnode 时，用新子组件 vnode 上的数据更新对应的组件实例
             - 更新 props，触发响应式（若此时子组件渲染 watcher 有订阅 props，则通知子组件重新渲染）
 
+##### 03.组件更新
+
+- 数据变化后，触发渲染 watcher 重新执行
+    - vm._render 过程中，生成新的 vnode
+    - vm._update 过程中，新旧 vnode 执行 patch 函数
+        - 新旧 vnode 不同时，删除旧 vnode 对应的 dom 元素，挂载新 vnode 对应的 dom 元素
+        - 新旧 vnode 相同时
+            - vnode 为组件 vnode，根据新 vnode 上的数据对 vnode 对应组件实例上的数据进行更新，进而触发组件重新渲染
+            - vnode 为普通 vnode
+                - 基于新旧 vnode 的差异对旧 vnode 对应的 dom 元素进行更新
+                - 通过 diff 算法对 vnode.children 进行更新
