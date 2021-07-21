@@ -20,7 +20,7 @@ function createFunction (code, errors) {
 export function createCompileToFunctionFn (compile: Function): Function {
   const cache = Object.create(null)
 
-  return function compileToFunctions (
+  return function compileToFunctions ( // 挂载过程中要调用的编译函数
     template: string,
     options?: CompilerOptions,
     vm?: Component
@@ -29,7 +29,7 @@ export function createCompileToFunctionFn (compile: Function): Function {
     const warn = options.warn || baseWarn
     delete options.warn
 
-    /* istanbul ignore if */
+    // 开发环境下判断能否执行 new Function()
     if (process.env.NODE_ENV !== 'production') {
       // detect possible CSP restriction
       try {
@@ -47,7 +47,7 @@ export function createCompileToFunctionFn (compile: Function): Function {
       }
     }
 
-    // check cache
+    // 根据模板生成 key，检查缓存中是否存在对应的 render 函数
     const key = options.delimiters
       ? String(options.delimiters) + template
       : template
@@ -55,7 +55,7 @@ export function createCompileToFunctionFn (compile: Function): Function {
       return cache[key]
     }
 
-    // compile
+    // 编译
     const compiled = compile(template, options)
 
     // check compilation errors/tips
@@ -72,7 +72,7 @@ export function createCompileToFunctionFn (compile: Function): Function {
       }
     }
 
-    // turn code into functions
+    // 将编译生成的代码字符串转成 render 函数
     const res = {}
     const fnGenErrors = []
     res.render = createFunction(compiled.render, fnGenErrors)
@@ -94,6 +94,7 @@ export function createCompileToFunctionFn (compile: Function): Function {
       }
     }
 
+    // 缓存生成的 render 函数并返回
     return (cache[key] = res)
   }
 }

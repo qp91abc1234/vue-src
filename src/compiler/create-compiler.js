@@ -17,6 +17,7 @@ export function createCompilerCreator (baseCompile: Function): Function {
         (tip ? tips : errors).push(msg)
       }
 
+      // options 与 baseOptions 合并
       if (options) {
         // merge custom modules
         if (options.modules) {
@@ -38,6 +39,7 @@ export function createCompilerCreator (baseCompile: Function): Function {
         }
       }
 
+      // 调用基础编译函数
       const compiled = baseCompile(template, finalOptions)
       if (process.env.NODE_ENV !== 'production') {
         errors.push.apply(errors, detectErrors(compiled.ast))

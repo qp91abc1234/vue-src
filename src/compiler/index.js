@@ -12,10 +12,13 @@ export const createCompiler = createCompilerCreator(function baseCompile (
   template: string,
   options: CompilerOptions
 ): CompiledResult {
+  // 生成 ast 树
   const ast = parse(template.trim(), options)
+  // ast 树优化
   if (options.optimize !== false) {
     optimize(ast, options)
   }
+  // 根据 ast 树生成代码字符串
   const code = generate(ast, options)
   return {
     ast,

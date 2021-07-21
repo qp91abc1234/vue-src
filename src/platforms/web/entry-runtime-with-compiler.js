@@ -78,7 +78,7 @@ Vue.prototype.$mount = function (
         mark('compile')
       }
 
-      // 将 template 编译为渲染函数，并缓存至 options 中
+      // 将 template 编译为 render 函数，并缓存至 options 中
       const { render, staticRenderFns } = compileToFunctions(template, {
         shouldDecodeNewlines,
         shouldDecodeNewlinesForHref,
